@@ -1,7 +1,8 @@
-package dev.begli.exchangerate
+package dev.begli.exchangerate.view.activities
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import dev.begli.exchangerate.R
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
