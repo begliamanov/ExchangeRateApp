@@ -1,15 +1,14 @@
 package dev.begli.exchangerate.view.ui.home
 
-import androidx.lifecycle.ViewModelProvider
 import android.os.Bundle
-import android.util.Log
-import androidx.fragment.app.Fragment
+import android.os.Handler
+import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
-import dev.begli.exchangerate.R
-import dev.begli.exchangerate.databinding.ActivityMainBinding
 import dev.begli.exchangerate.databinding.HomeFragmentBinding
 import dev.begli.exchangerate.model.network.ExchangeRatesApi
 import dev.begli.exchangerate.model.network.RemoteDataSource
@@ -17,8 +16,10 @@ import dev.begli.exchangerate.model.network.Resource
 import dev.begli.exchangerate.repositories.ExchangeRateRepository
 import dev.begli.exchangerate.utils.Constants.Companion.FIVE_SECONDS
 import dev.begli.exchangerate.utils.CookieBarNotify
+import dev.begli.exchangerate.utils.DateConverter
 import dev.begli.exchangerate.view.adapters.ExchangeRatesAdapter
 import java.util.*
+
 
 class HomeFragment : Fragment() {
 
@@ -57,12 +58,17 @@ class HomeFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        // Get exchange rates
+        val currentTime = getExchangeRates()
+        binding.refreshTime.text = "Latest update: $currentTime"
 
         // Run following function periodically every x seconds.
         Timer().scheduleAtFixedRate( object : TimerTask() {
             override fun run() {
                 // Get exchange rates
-                viewModel.getExchangeRates()
+                val currentTime = getExchangeRates()
+                Handler(Looper.getMainLooper()).post { binding.refreshTime.text = "Latest update: $currentTime" }
+
             }
         }, 0, FIVE_SECONDS)
 
@@ -78,6 +84,12 @@ class HomeFragment : Fragment() {
                 }
             }
         }
+    }
+
+    private fun getExchangeRates(): String? {
+        viewModel.getExchangeRates()
+        // Update refresh time
+        return DateConverter().format(Date(), "hh:mm:ss")
     }
 
 
