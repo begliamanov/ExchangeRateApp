@@ -5,12 +5,9 @@
     android:layout_height="match_parent"
     tools:context=".view.ui.home.HomeFragment">
 
-    <TextView
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rates_recycler_view"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="center"
-        android:textSize="26dp"
-        android:textStyle="bold"
-        android:text="Home" />
+        android:layout_height="match_parent"/>
 
 </FrameLayout>
