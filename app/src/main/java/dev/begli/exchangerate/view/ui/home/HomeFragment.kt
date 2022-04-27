@@ -7,26 +7,57 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import dev.begli.exchangerate.R
+import dev.begli.exchangerate.databinding.ActivityMainBinding
+import dev.begli.exchangerate.databinding.HomeFragmentBinding
+import dev.begli.exchangerate.model.network.ExchangeRatesApi
+import dev.begli.exchangerate.model.network.RemoteDataSource
+import dev.begli.exchangerate.model.network.Resource
+import dev.begli.exchangerate.repositories.ExchangeRateRepository
+import dev.begli.exchangerate.utils.CookieBarNotify
 
 class HomeFragment : Fragment() {
 
-    companion object {
-        fun newInstance() = HomeFragment()
-    }
-
     private lateinit var viewModel: HomeViewModel
+    private lateinit var binding: HomeFragmentBinding
+
+    private lateinit var cookieBarNotify: CookieBarNotify
+
+    private val remoteDataSource = RemoteDataSource()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.home_fragment, container, false)
+        binding = HomeFragmentBinding.inflate(inflater, container, false)
+
+        // CookieBar notification init
+        cookieBarNotify = CookieBarNotify(requireActivity())
+        // ViewModel init
+        val factory = HomeViewModelFactory(ExchangeRateRepository(remoteDataSource
+                .buildApi(ExchangeRatesApi::class.java)))
+        viewModel = ViewModelProvider(this, factory)[HomeViewModel::class.java]
+
+        return binding.root
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-        viewModel = ViewModelProvider(this).get(HomeViewModel::class.java)
-        // TODO: Use the ViewModel
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        // Get exchange rates
+        viewModel.getExchangeRates()
+
+        // Observe exchange rates live data
+        viewModel.exchangeRates.observe(viewLifecycleOwner) {
+            when (it) {
+                is Resource.Success -> {
+                    cookieBarNotify.success("Success!")
+                }
+                is Resource.Failure -> {
+                    cookieBarNotify.error("Failure!")
+                }
+            }
+        }
     }
+
 
 }
