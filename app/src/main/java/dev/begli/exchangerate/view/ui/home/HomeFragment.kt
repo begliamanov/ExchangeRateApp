@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dev.begli.exchangerate.R
 import dev.begli.exchangerate.databinding.HomeFragmentBinding
+import dev.begli.exchangerate.model.data.SharedPref
 import dev.begli.exchangerate.model.network.ExchangeRatesApi
 import dev.begli.exchangerate.model.network.RemoteDataSource
 import dev.begli.exchangerate.model.network.Resource
@@ -19,6 +20,7 @@ import dev.begli.exchangerate.repositories.ExchangeRateRepository
 import dev.begli.exchangerate.utils.Constants.Companion.FIVE_SECONDS
 import dev.begli.exchangerate.utils.CookieBarNotify
 import dev.begli.exchangerate.utils.DateConverter
+import dev.begli.exchangerate.utils.Exchange
 import dev.begli.exchangerate.view.adapters.ExchangeRatesAdapter
 import java.util.*
 import kotlin.collections.ArrayList
@@ -32,6 +34,7 @@ class HomeFragment : Fragment() {
     private lateinit var cookieBarNotify: CookieBarNotify
     private lateinit var exchangeRatesAdapter: ExchangeRatesAdapter
     private lateinit var rates: Array<String>
+    private lateinit var sharedPref: SharedPref
 
     private val remoteDataSource = RemoteDataSource()
 
@@ -43,6 +46,8 @@ class HomeFragment : Fragment() {
 
         // CookieBar notification init
         cookieBarNotify = CookieBarNotify(requireActivity())
+        // Shared Preferences init
+        sharedPref = SharedPref(requireContext())
         // ViewModel init
         val factory = HomeViewModelFactory(ExchangeRateRepository(remoteDataSource
                 .buildApi(ExchangeRatesApi::class.java)))
@@ -64,6 +69,7 @@ class HomeFragment : Fragment() {
         // Get exchange rates
         val currentTime = getExchangeRates()
         binding.refreshTime.text = "Latest update: $currentTime"
+        binding.defaultRateTextView.text = sharedPref.defaultRate()
 
         binding.defaultRateCard.setOnClickListener {
             MaterialAlertDialogBuilder(
@@ -72,8 +78,10 @@ class HomeFragment : Fragment() {
             )
                 .setTitle("Select a base rate")
                 .setItems(rates) { dialog, which ->
-                    binding.defaultRateTextView.text = rates[which]
-
+                    sharedPref.setDefaultRate(rates[which])
+                    binding.defaultRateTextView.text = sharedPref.defaultRate()
+                    viewModel.getExchangeRates()
+                    binding.refreshTime.text = "Latest update: ${getExchangeRates()}"
                 }
                 .show()
         }
@@ -82,8 +90,7 @@ class HomeFragment : Fragment() {
         Timer().scheduleAtFixedRate( object : TimerTask() {
             override fun run() {
                 // Get exchange rates
-                val currentTime = getExchangeRates()
-                Handler(Looper.getMainLooper()).post { binding.refreshTime.text = "Latest update: $currentTime" }
+//                Handler(Looper.getMainLooper()).post { binding.refreshTime.text = "Latest update: ${getExchangeRates()}" }
 
             }
         }, 0, FIVE_SECONDS)
@@ -92,8 +99,9 @@ class HomeFragment : Fragment() {
         viewModel.exchangeRates.observe(viewLifecycleOwner) {
             when (it) {
                 is Resource.Success -> {
+                    val updateRates = Exchange().exchangeAllRates(it.value.rates[sharedPref.defaultRate()]!!, it.value.rates)
                     // Populating rates adapter
-                    exchangeRatesAdapter.setDataSet(it.value.rates)
+                    exchangeRatesAdapter.setDataSet(updateRates)
                     // declare rates
                     rates = it.value.rates.keys.toTypedArray()
                 }
