@@ -5,6 +5,6 @@ import dev.begli.exchangerate.model.network.ExchangeRatesApi
 
 class ExchangeRateRepository(private val api: ExchangeRatesApi) : BaseRepository() {
 
-    suspend fun getExchangeRates(accessToken: String) = safeApiCall { api.getExchangeRates() }
+    suspend fun getExchangeRates(accessToken: String) = safeApiCall { api.getExchangeRates(accessToken) }
 
 }

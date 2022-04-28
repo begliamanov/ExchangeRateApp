@@ -9,6 +9,8 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import dev.begli.exchangerate.R
 import dev.begli.exchangerate.databinding.HomeFragmentBinding
 import dev.begli.exchangerate.model.network.ExchangeRatesApi
 import dev.begli.exchangerate.model.network.RemoteDataSource
@@ -19,6 +21,7 @@ import dev.begli.exchangerate.utils.CookieBarNotify
 import dev.begli.exchangerate.utils.DateConverter
 import dev.begli.exchangerate.view.adapters.ExchangeRatesAdapter
 import java.util.*
+import kotlin.collections.ArrayList
 
 
 class HomeFragment : Fragment() {
@@ -27,10 +30,10 @@ class HomeFragment : Fragment() {
     private lateinit var binding: HomeFragmentBinding
 
     private lateinit var cookieBarNotify: CookieBarNotify
+    private lateinit var exchangeRatesAdapter: ExchangeRatesAdapter
+    private lateinit var rates: Array<String>
 
     private val remoteDataSource = RemoteDataSource()
-
-    private lateinit var exchangeRatesAdapter: ExchangeRatesAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -62,6 +65,19 @@ class HomeFragment : Fragment() {
         val currentTime = getExchangeRates()
         binding.refreshTime.text = "Latest update: $currentTime"
 
+        binding.defaultRateCard.setOnClickListener {
+            MaterialAlertDialogBuilder(
+                requireContext(),
+                R.style.MaterialAlertDialog_Rounded
+            )
+                .setTitle("Select a base rate")
+                .setItems(rates) { dialog, which ->
+                    binding.defaultRateTextView.text = rates[which]
+
+                }
+                .show()
+        }
+
         // Run following function periodically every x seconds.
         Timer().scheduleAtFixedRate( object : TimerTask() {
             override fun run() {
@@ -78,9 +94,11 @@ class HomeFragment : Fragment() {
                 is Resource.Success -> {
                     // Populating rates adapter
                     exchangeRatesAdapter.setDataSet(it.value.rates)
+                    // declare rates
+                    rates = it.value.rates.keys.toTypedArray()
                 }
                 is Resource.Failure -> {
-                    cookieBarNotify.error("Failure!")
+                    cookieBarNotify.error(it.message ?: "Unexpected error")
                 }
             }
         }

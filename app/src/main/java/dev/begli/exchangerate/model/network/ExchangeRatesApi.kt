@@ -5,6 +5,6 @@ import retrofit2.http.*
 
 interface ExchangeRatesApi {
 
-    @GET("/v1/latest?access_key=b9c5ba2a01634b1cab862029aa13087f&format=1")
-    suspend fun getExchangeRates(): ExchangeRateResponse
+    @GET("/v1/latest")
+    suspend fun getExchangeRates(@Query("access_key") accessKey: String): ExchangeRateResponse
 }
