@@ -140,16 +140,17 @@
         </com.google.android.material.card.MaterialCardView>
 
         <ImageView
-            android:id="@+id/imageView2"
+            android:id="@+id/history_image_view"
             android:layout_width="45dp"
             android:layout_height="45dp"
             android:layout_marginEnd="16dp"
             android:clickable="true"
             android:padding="8dp"
-            android:src="@drawable/ic_baseline_settings_24"
+            android:src="@drawable/ic_baseline_history_24"
             app:layout_constraintBottom_toBottomOf="@+id/refresh_card"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/refresh_card" />
+            app:layout_constraintTop_toTopOf="@+id/refresh_card"
+            app:tint="@color/apple_orange" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

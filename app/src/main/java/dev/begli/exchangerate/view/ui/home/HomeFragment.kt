@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dev.begli.exchangerate.R
@@ -74,41 +75,19 @@ class HomeFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        // Navigate to history fragment
+        binding.historyImageView.setOnClickListener { findNavController().navigate(R.id.action_homeFragment_to_historyFragment) }
+
         // Get exchange rates
         binding.refreshTime.text = getExchangeRates()
         binding.defaultRateTextView.text = sharedPref.defaultRate()
         binding.refreshTextView.text = refreshTimes[refreshTimesLong.indexOf(sharedPref.refreshInterval())]
 
         // default rate setting card
-        binding.defaultRateCard.setOnClickListener {
-            MaterialAlertDialogBuilder(
-                requireContext(),
-                R.style.MaterialAlertDialog_Rounded
-            )
-                .setTitle("Select a base rate")
-                .setItems(rates) { dialog, which ->
-                    sharedPref.setDefaultRate(rates[which])
-                    binding.defaultRateTextView.text = sharedPref.defaultRate()
-                    binding.refreshTime.text = getExchangeRates()
-                }
-                .show()
-        }
+        defaultRateSettingCard()
 
-        // default refresh tome setting card
-        binding.refreshCard.setOnClickListener {
-            MaterialAlertDialogBuilder(
-                requireContext(),
-                R.style.MaterialAlertDialog_Rounded
-            )
-                .setTitle("Select a refresh rate")
-                .setItems(refreshTimes) { dialog, which ->
-                    sharedPref.setRefreshInterval(refreshTimesLong[which])
-                    binding.refreshTextView.text = refreshTimes[which]
-                    timer.cancel()
-                    setTimer()
-                }
-                .show()
-        }
+        // default refresh time setting card
+        defaultRefreshTimeCard()
 
         // Run following function periodically every x seconds.
         setTimer()
@@ -127,6 +106,39 @@ class HomeFragment : Fragment() {
                     cookieBarNotify.error(it.message ?: "Unexpected error")
                 }
             }
+        }
+    }
+
+    private fun defaultRefreshTimeCard() {
+        binding.refreshCard.setOnClickListener {
+            MaterialAlertDialogBuilder(
+                requireContext(),
+                R.style.MaterialAlertDialog_Rounded
+            )
+                .setTitle("Select a refresh rate")
+                .setItems(refreshTimes) { dialog, which ->
+                    sharedPref.setRefreshInterval(refreshTimesLong[which])
+                    binding.refreshTextView.text = refreshTimes[which]
+                    timer.cancel()
+                    setTimer()
+                }
+                .show()
+        }
+    }
+
+    private fun defaultRateSettingCard() {
+        binding.defaultRateCard.setOnClickListener {
+            MaterialAlertDialogBuilder(
+                requireContext(),
+                R.style.MaterialAlertDialog_Rounded
+            )
+                .setTitle("Select a base rate")
+                .setItems(rates) { dialog, which ->
+                    sharedPref.setDefaultRate(rates[which])
+                    binding.defaultRateTextView.text = sharedPref.defaultRate()
+                    binding.refreshTime.text = getExchangeRates()
+                }
+                .show()
         }
     }
 
