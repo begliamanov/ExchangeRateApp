@@ -17,13 +17,15 @@ import dev.begli.exchangerate.model.network.ExchangeRatesApi
 import dev.begli.exchangerate.model.network.RemoteDataSource
 import dev.begli.exchangerate.model.network.Resource
 import dev.begli.exchangerate.repositories.ExchangeRateRepository
+import dev.begli.exchangerate.utils.Constants.Companion.FIFTEEN_SECONDS
 import dev.begli.exchangerate.utils.Constants.Companion.FIVE_SECONDS
+import dev.begli.exchangerate.utils.Constants.Companion.THREE_SECONDS
 import dev.begli.exchangerate.utils.CookieBarNotify
 import dev.begli.exchangerate.utils.DateConverter
 import dev.begli.exchangerate.utils.Exchange
 import dev.begli.exchangerate.view.adapters.ExchangeRatesAdapter
+import java.sql.Time
 import java.util.*
-import kotlin.collections.ArrayList
 
 
 class HomeFragment : Fragment() {
@@ -35,8 +37,14 @@ class HomeFragment : Fragment() {
     private lateinit var exchangeRatesAdapter: ExchangeRatesAdapter
     private lateinit var rates: Array<String>
     private lateinit var sharedPref: SharedPref
+    private lateinit var timer: Timer
 
     private val remoteDataSource = RemoteDataSource()
+
+
+
+    private val refreshTimes = arrayOf("3 seconds", "5 seconds", "15 seconds")
+    private val refreshTimesLong = arrayOf(THREE_SECONDS, FIVE_SECONDS, FIFTEEN_SECONDS)
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -67,10 +75,11 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         // Get exchange rates
-        val currentTime = getExchangeRates()
-        binding.refreshTime.text = "Latest update: $currentTime"
+        binding.refreshTime.text = getExchangeRates()
         binding.defaultRateTextView.text = sharedPref.defaultRate()
+        binding.refreshTextView.text = refreshTimes[refreshTimesLong.indexOf(sharedPref.refreshInterval())]
 
+        // default rate setting card
         binding.defaultRateCard.setOnClickListener {
             MaterialAlertDialogBuilder(
                 requireContext(),
@@ -80,20 +89,29 @@ class HomeFragment : Fragment() {
                 .setItems(rates) { dialog, which ->
                     sharedPref.setDefaultRate(rates[which])
                     binding.defaultRateTextView.text = sharedPref.defaultRate()
-                    viewModel.getExchangeRates()
-                    binding.refreshTime.text = "Latest update: ${getExchangeRates()}"
+                    binding.refreshTime.text = getExchangeRates()
+                }
+                .show()
+        }
+
+        // default refresh tome setting card
+        binding.refreshCard.setOnClickListener {
+            MaterialAlertDialogBuilder(
+                requireContext(),
+                R.style.MaterialAlertDialog_Rounded
+            )
+                .setTitle("Select a refresh rate")
+                .setItems(refreshTimes) { dialog, which ->
+                    sharedPref.setRefreshInterval(refreshTimesLong[which])
+                    binding.refreshTextView.text = refreshTimes[which]
+                    timer.cancel()
+                    setTimer()
                 }
                 .show()
         }
 
         // Run following function periodically every x seconds.
-        Timer().scheduleAtFixedRate( object : TimerTask() {
-            override fun run() {
-                // Get exchange rates
-//                Handler(Looper.getMainLooper()).post { binding.refreshTime.text = "Latest update: ${getExchangeRates()}" }
-
-            }
-        }, 0, FIVE_SECONDS)
+        setTimer()
 
         // Observe exchange rates live data
         viewModel.exchangeRates.observe(viewLifecycleOwner) {
@@ -116,6 +134,16 @@ class HomeFragment : Fragment() {
         viewModel.getExchangeRates()
         // Update refresh time
         return DateConverter().format(Date(), "hh:mm:ss")
+    }
+
+    private fun setTimer() {
+        timer = Timer()
+        timer.scheduleAtFixedRate( object : TimerTask() {
+            override fun run() {
+                // Get exchange rates
+                Handler(Looper.getMainLooper()).post { binding.refreshTime.text = getExchangeRates() }
+            }
+        }, 0, sharedPref.refreshInterval())
     }
 
 

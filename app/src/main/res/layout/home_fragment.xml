@@ -12,29 +12,6 @@
         android:background="@color/background">
 
         <com.google.android.material.card.MaterialCardView
-            android:id="@+id/materialCardView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="24dp"
-            app:cardBackgroundColor="@color/white"
-            app:cardCornerRadius="10dp"
-            app:cardElevation="0dp"
-            app:layout_constraintBottom_toBottomOf="@+id/default_rate_card"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/default_rate_card">
-
-            <TextView
-                android:id="@+id/refresh_time"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="12dp"
-                android:layout_marginEnd="16dp"
-                android:layout_marginBottom="12dp"
-                android:text="Updated: 23:00" />
-        </com.google.android.material.card.MaterialCardView>
-
-        <com.google.android.material.card.MaterialCardView
             android:id="@+id/default_rate_card"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -82,8 +59,66 @@
 
         </com.google.android.material.card.MaterialCardView>
 
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/refresh_card"
+            android:layout_width="wrap_content"
+            android:layout_height="47dp"
+            android:layout_marginStart="8dp"
+            android:clickable="true"
+            app:cardBackgroundColor="@color/white"
+            app:cardCornerRadius="12dp"
+            app:layout_constraintBottom_toBottomOf="@+id/default_rate_card"
+            app:layout_constraintStart_toEndOf="@+id/default_rate_card"
+            app:layout_constraintTop_toTopOf="@+id/default_rate_card">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:id="@+id/refresh_text_view"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginEnd="4dp"
+                    android:text="5 seconds"
+                    app:layout_constraintBottom_toTopOf="@+id/refresh_time"
+                    app:layout_constraintEnd_toStartOf="@+id/imageView24"
+                    app:layout_constraintHorizontal_bias="0.5"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintVertical_chainStyle="packed" />
+
+                <ImageView
+                    android:id="@+id/imageView24"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="4dp"
+                    android:src="@drawable/ic_round_keyboard_arrow_down_24"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:tint="@color/grey_500" />
+
+                <TextView
+                    android:id="@+id/refresh_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:text="23:00"
+                    android:textColor="@color/grey_500"
+                    android:textStyle="italic"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/refresh_text_view" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+
 
         <com.google.android.material.card.MaterialCardView
+            android:id="@+id/materialCardView2"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:layout_marginStart="24dp"
@@ -103,6 +138,18 @@
                 android:layout_height="match_parent" />
 
         </com.google.android.material.card.MaterialCardView>
+
+        <ImageView
+            android:id="@+id/imageView2"
+            android:layout_width="45dp"
+            android:layout_height="45dp"
+            android:layout_marginEnd="16dp"
+            android:clickable="true"
+            android:padding="8dp"
+            android:src="@drawable/ic_baseline_settings_24"
+            app:layout_constraintBottom_toBottomOf="@+id/refresh_card"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/refresh_card" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
