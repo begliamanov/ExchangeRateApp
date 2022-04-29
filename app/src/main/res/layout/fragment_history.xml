@@ -12,4 +12,16 @@
         android:gravity="center"
         android:text="History" />
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Unable to access the api:\nFollowing error is displayed\n\n{
+  \n
+  error: {\n
+  code: https_access_restricted,\n
+  message: Access Restricted - Your current Subscription \n
+                    Plan does not support HTTPS Encryption.\n
+  }\n
+}"/>
+
 </FrameLayout>
